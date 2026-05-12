@@ -412,21 +412,21 @@
                             <strong>In-Context Continual Learning:</strong> The system progressively accumulates information over turns within a single session, but does not persist beyond the session.<br><br>
                             <strong>Examples:</strong><br>
                             • Multi-turn chat (e.g., ChatGPT)<br>
-                            • Agent frameworks like <a href="#ref-yao2022react">ReAct (Yao et al., 2022)</a>
+                            • Agent frameworks like <a href="https://arxiv.org/abs/2210.03629" target="_blank">ReAct (Yao et al., 2022)</a>
                         </span></span>), storage-based
                         (<span class="tooltip">CL2<span class="tooltip-content">
                             <strong>Storage-based Continual Learning:</strong> The system has an external store where it can write information and access it in later turns or sessions.<br><br>
                             <strong>Examples:</strong><br>
-                            • Multi-session memory (<a href="#ref-chen2026relational">Chen et al., 2026</a>)<br>
-                            • Agent skills (<a href="#ref-anthropic2024">Anthropic, 2024</a>)<br>
-                            • Retrieval Augmented Generation (<a href="#ref-lewis2020">Lewis et al., 2020</a>)<br>
-                            • Agentic context editing (<a href="#ref-zhang2025agentic">Zhang et al., 2025</a>)
+                            • Multi-session memory (Chen et al., 2026)<br>
+                            • Agent skills (<a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview" target="_blank">Anthropic, 2024</a>)<br>
+                            • Retrieval Augmented Generation (<a href="https://arxiv.org/abs/2005.11401" target="_blank">Lewis et al., 2020</a>)<br>
+                            • Agentic context editing (<a href="https://openreview.net/forum?id=eC4ygDs02R" target="_blank">Zhang et al., 2025</a>)
                         </span></span>), and parameter-based (<span class="tooltip">CL3<span class="tooltip-content">
                             <strong>Parameter-based Continual Learning:</strong> System parameters are modified post-deployment in response to experiences, persisting across turns and sessions.<br><br>
                             <strong>Examples:</strong><br>
-                            • Weight modification (<a href="#ref-eyuboglu2025">Eyuboglu et al., 2025</a>; <a href="#ref-golovneva2025">Golovneva et al., 2025</a>; <a href="#ref-behrouz2025">Behrouz et al., 2025</a>)<br>
-                            • Test-time training (<a href="#ref-gandelsman2022">Gandelsman et al., 2022</a>)<br>
-                            • Architecture modification (<a href="#ref-zhang2026">Zhang et al., 2026</a>)
+                            • Weight modification (<a href="https://arxiv.org/abs/2506.06266" target="_blank">Eyuboglu et al., 2025</a>; <a href="https://arxiv.org/abs/2504.00927" target="_blank">Golovneva et al., 2025</a>; <a href="https://arxiv.org/abs/2512.24695" target="_blank">Behrouz et al., 2025</a>)<br>
+                            • Test-time training (<a href="https://arxiv.org/abs/2209.07522" target="_blank">Gandelsman et al., 2022</a>)<br>
+                            • Architecture modification (<a href="https://arxiv.org/abs/2603.19461" target="_blank">Zhang et al., 2026</a>)
                         </span></span>). We then formalise CL systems through an <em>internal state</em> and a <em>behavioural profile</em> (a vector of capabilities and propensities describing the system's behaviour),
                         leading to the notion of a behavioural trajectory that evolves with experience.
                     </p>
@@ -450,8 +450,18 @@
                 <div class="contribution-overview">
                     <strong>§3. Current evaluation practice is insufficient for CL systems</strong>
                     <p style="margin-top: 10px;">
-                        Continual learning can cause undesirable propensity and capability changes&mdash;such as <em>guardrail degradation,
-                        propensity cross-contamination, unbalanced specialisation, cross-domain transfer, or capability degradation</em> over turns and sessions&mdash;arising
+                        Continual learning can cause undesirable propensity and capability changes&mdash;such as <span class="tooltip"><em>guardrail degradation</em><span class="tooltip-content">
+                            <strong>Guardrail Degradation:</strong> Alignment and safety properties erode over time as the system learns from deployment experiences.
+                        </span></span>,
+                        <span class="tooltip"><em>propensity cross-contamination</em><span class="tooltip-content">
+                            <strong>Propensity Cross-Contamination:</strong> Changes in one specific propensity inadvertently affect another, seemingly unrelated one.
+                        </span></span>, <span class="tooltip"><em>unbalanced specialisation</em><span class="tooltip-content">
+                            <strong>Unbalanced Specialisation:</strong> The system becomes proficient in a specific domain at the expense of others (also known as "catastrophic forgetting").
+                        </span></span>, <span class="tooltip"><em>cross-domain transfer</em><span class="tooltip-content">
+                            <strong>Cross-Domain Transfer:</strong> Improvement in one capability boosts seemingly unrelated capabilities in unexpected ways.
+                        </span></span>, or <span class="tooltip"><em>capability degradation</em><span class="tooltip-content">
+                            <strong>Capability Degradation:</strong> Capabilities erode after a large number of turns or sessions.
+                        </span></span> over turns and sessions&mdash;arising
                         from benign-use divergence or adversarial manipulation. <u>Current pre-deployment evaluation assumes systems do not
                         change after deployment, and deployment-time monitors (e.g., output filters, chain-of-thought monitors) are
                         calibrated on the released checkpoint</u>. This makes the <b>prevailing paradigm structurally inadequate for CL</b>.
@@ -459,19 +469,19 @@
 
                     <div class="expandable-box">
                         <div class="expandable-header" onclick="toggleExpand(this)">
-                            <strong>Definition and Demonstrations of Failure Modes</strong>
+                            <strong>Demonstrations of Failure Modes</strong>
                         </div>
                         <div class="expandable-content">
                             <p><strong>Propensity Changes:</strong></p>
                             <ul>
-                                <li><strong>Guardrail degradation:</strong> Alignment and safety properties erode over time, already observed in CL1 enabling jailbreaks (Russinovich et al., 2025; Gibbs et al., 2024)</li>
-                                <li><strong>Propensity cross-contamination:</strong> Changes in one specific propensity inadvertently affect another seemingly unrelated one. Examples: rewarding "Nerdy" personality amplified goblin mentions (OpenAI, 2026); fine-tuning on specific misaligned behaviours produced "emergent misalignment" in broader contexts (Betley et al., 2025)</li>
+                                <li><strong>Guardrail degradation:</strong> Already observed in CL1 enabling jailbreaks (<a href="https://arxiv.org/abs/2404.01833" target="_blank">Russinovich et al., 2025</a>; <a href="https://arxiv.org/abs/2409.00137" target="_blank">Gibbs et al., 2024</a>)</li>
+                                <li><strong>Propensity cross-contamination:</strong> Rewarding "Nerdy" personality amplified goblin mentions (<a href="https://openai.com/index/where-the-goblins-came-from/" target="_blank">OpenAI, 2026</a>); fine-tuning on specific misaligned behaviours produced "emergent misalignment" in broader contexts (<a href="https://openreview.net/forum?id=aOIJ2gVRWW" target="_blank">Betley et al., 2025</a>)</li>
                             </ul>
                             <p><strong>Capability Changes:</strong></p>
                             <ul>
-                                <li><strong>Unbalanced specialisation:</strong> The system becomes proficient in a specific domain at the expense of others, extensively documented as "catastrophic forgetting" (Liu et al., 2024; Song et al., 2025)</li>
-                                <li><strong>Cross-domain transfer:</strong> Improvement in one capability boosts seemingly unrelated capabilities, e.g., code in pre-training improving natural-language reasoning (Aryabumi et al., 2024)</li>
-                                <li><strong>Capability degradation:</strong> Capabilities erode after many turns or sessions, observed in multi-turn conversations (Laban et al., 2025) and fine-tuning encouraging hallucinations (Kaplan et al., 2026; Goel et al., 2026)</li>
+                                <li><strong>Unbalanced specialisation:</strong> Extensively documented as "catastrophic forgetting" in domain-specific fine-tuning (<a href="https://arxiv.org/abs/2405.17830" target="_blank">Liu et al., 2024</a>; <a href="https://arxiv.org/abs/2501.13669" target="_blank">Song et al., 2025</a>)</li>
+                                <li><strong>Cross-domain transfer:</strong> Including code in pre-training data improves natural-language reasoning (<a href="https://arxiv.org/abs/2408.10914" target="_blank">Aryabumi et al., 2024</a>)</li>
+                                <li><strong>Capability degradation:</strong> Observed in multi-turn conversations (<a href="https://arxiv.org/abs/2505.06120" target="_blank">Laban et al., 2025</a>) and fine-tuning that encourages hallucinations and reduces contextual reasoning (<a href="https://arxiv.org/abs/2604.15574" target="_blank">Kaplan et al., 2026</a>; <a href="https://arxiv.org/abs/2601.15220" target="_blank">Goel et al., 2026</a>)</li>
                             </ul>
                         </div>
                     </div>
@@ -564,11 +574,9 @@
                             <strong>Sensitivity to States and Inputs:</strong> Small differences in the system's state or inputs produce exponentially diverging differences in the resulting behavioural profile through "sensitive dependence on initial conditions." Beyond a characteristic time horizon, prediction becomes intractable even with perfect knowledge of the update rule. This is analogous to weather forecasting where long-range prediction fails due to exponential sensitivity to unmeasurable details. CL systems may exhibit this through high-dimensional non-linear token-mixing (CL1), memory operations (CL2), or chaotic loss landscapes (CL3).
                         </span></span> to states and inputs can prevent predictive monitors from generalising beyond elicited
                         trajectories. <span class="tooltip"><em>Multiplicity of attractors</em><span class="tooltip-content">
-                            <strong>Multiplicity of Attractors:</strong> The system may have multiple attractors—regions of state space toward which trajectories converge based on their starting basin. Trajectories starting in one basin never enter another basin's attractor. Like Hopfield networks with stored patterns, a single trajectory or collection of trajectories from one basin reveals nothing about other basins. In CL systems, this can arise from local minima in loss landscapes (CL3), self-reinforcing retrieval biases (CL2), or locked behavioural regimes in long contexts (CL1).
+                            <strong>Multiplicity of Attractors:</strong> The system may have multiple attractors—regions of state space toward which trajectories converge based on their starting basin. Trajectories starting in one basin never enter another basin's attractor. Like <a href="https://en.wikipedia.org/wiki/Hopfield_network" target="_blank">Hopfield networks</a> with stored patterns, a single trajectory or collection of trajectories from one basin reveals nothing about other basins. In CL systems, this can arise from local minima in loss landscapes (CL3), self-reinforcing retrieval biases (CL2), or locked behavioural regimes in long contexts (CL1).
                         </span></span> means elicited trajectories may cover only a subset of reachable
-                        basins, and deployed systems may converge to attractors that the sandbox failed to surface. There is an <span class="tooltip"><em>asymmetric epistemic burden</em><span class="tooltip-content">
-                            <strong>Asymmetric Epistemic Burden:</strong> One demonstration (a single divergent trajectory pair) is sufficient to show the presence of chaos or a new attractor. However, proving absence requires a global guarantee about the entire state space, which is extremely difficult. A sandbox where all trajectories appear well-behaved could mean the system is globally safe OR that rare dangerous sequences weren't sampled.
-                        </span></span>: one demonstration is sufficient to show the presence of one of these obstacles, but showing absence is much more difficult.
+                        basins, and deployed systems may converge to attractors that the sandbox failed to surface. There is an <em>asymmetric epistemic burden</em>: one demonstration is sufficient to show the presence of one of these obstacles, but showing absence is much more difficult.
                         The two obstacles are
                         logically independent: a system may display either, both, or neither. Moreover, the adversarial scenario worses both concerns.
                     </p>
