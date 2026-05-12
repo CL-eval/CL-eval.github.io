@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continual Learning Requires Evaluating Trajectories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+            line-height: 1.3;
+        }
+
+        .authors {
+            font-size: 1.05em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 32px;
+            background-color: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            font-size: 1.05em;
+        }
+
+        .download-btn:hover {
+            background-color: #0052a3;
+        }
+
+        section {
+            margin-bottom: 60px;
+        }
+
+        h2 {
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+            border-left: 4px solid #0066cc;
+            padding-left: 15px;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+        }
+
+        /* Layman summary section */
+        .layman-summary {
+            background: #f0f7ff;
+            padding: 30px;
+            border-left: 4px solid #0066cc;
+            border-radius: 4px;
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        /* Abstract section */
+        .abstract {
+            background: #f5f5f5;
+            padding: 25px;
+            border-left: 4px solid #0066cc;
+            border-radius: 4px;
+            font-size: 1.05em;
+            line-height: 1.8;
+        }
+
+        /* Figure sections */
+        .figure-section {
+            margin-bottom: 60px;
+        }
+
+        .figure-section h3 {
+            margin-bottom: 12px;
+        }
+
+        .figure-section > p {
+            margin-bottom: 20px;
+            font-size: 1em;
+            line-height: 1.7;
+            color: #444;
+        }
+
+        .figure-container {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .figure-image {
+            width: 100%;
+            max-width: 900px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 0 auto 15px;
+            display: block;
+            background: white;
+            padding: 15px;
+        }
+
+        .figure-caption {
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* Contributions section */
+        .contribution {
+            margin-bottom: 25px;
+        }
+
+        .contribution-overview {
+            background: #f5f5f5;
+            padding: 20px;
+            border-left: 4px solid #0066cc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+            line-height: 1.7;
+        }
+
+        /* BibTeX section */
+        .bibtex-section {
+            background: #f5f5f5;
+            padding: 25px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+
+        .bibtex-section pre {
+            margin: 0;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* Hover tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline;
+            border-bottom: 1px dotted #0066cc;
+            cursor: help;
+        }
+
+        .tooltip .tooltip-content {
+            visibility: hidden;
+            width: 350px;
+            background-color: #fff;
+            color: #333;
+            text-align: left;
+            border-radius: 6px;
+            padding: 15px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -175px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .tooltip .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #fff transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-content a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .tooltip-content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Expandable box styles */
+        .expandable-box {
+            margin: 20px 0;
+        }
+
+        .expandable-header {
+            background: #e6f2ff;
+            padding: 15px;
+            border-left: 4px solid #0066cc;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s;
+        }
+
+        .expandable-header:hover {
+            background: #d1e7ff;
+        }
+
+        .expandable-header::before {
+            content: '▶ ';
+            display: inline-block;
+            margin-right: 8px;
+            transition: transform 0.3s;
+        }
+
+        .expandable-header.expanded::before {
+            transform: rotate(90deg);
+        }
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+            background: #f9f9f9;
+            border-left: 4px solid #e0e0e0;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .expandable-content.expanded {
+            max-height: 2000px;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .expandable-content ul {
+            margin-left: 20px;
+            line-height: 1.7;
+        }
+
+        .expandable-content li {
+            margin-bottom: 12px;
+        }
+
+        /* Collapsible list styles */
+        .collapsible-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .collapsible-list > li {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .collapsible-statement {
+            padding: 15px;
+            background: #f5f5f5;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s;
+        }
+
+        .collapsible-statement:hover {
+            background: #e8e8e8;
+        }
+
+        .collapsible-statement::before {
+            content: '▶ ';
+            display: inline-block;
+            margin-right: 8px;
+            transition: transform 0.3s;
+            color: #0066cc;
+        }
+
+        .collapsible-statement.expanded::before {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+
+        .collapsible-answer.expanded {
+            max-height: 500px;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.6em;
+            }
+
+            h2 {
+                font-size: 1.3em;
+            }
+
+            h3 {
+                font-size: 1.15em;
+            }
+
+            .layman-summary {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Continual Learning Requires Evaluating Trajectories</h1>
+            <p class="authors">Anonymous Authors</p>
+            <a href="paper.pdf" target="_blank" class="download-btn">Download PDF</a>
+        </header>
+
+        <section>
+            <div class="layman-summary">
+                <h3 style="margin-top: 0; color: #0066cc;">Abstract</h3>
+                    AI systems increasingly incorporate <em><b>continual learning</b></em> mechanisms allowing their behaviour to adapt after deployment,
+                    from (1) <u>in-context learning</u> and (2) <u>memory features</u> already in wide use to (3) <u>post-deployment weight modification</u> under research.
+        
+                    We argue that, by treating AI systems as frozen artefacts whose performance and safety are assessed at release, <b>current
+                    evaluation practices structurally ignore the behavioural trajectory of a system that continues to learn from experience</b>.
+                    Our position is that <b>evaluation of continual learning systems should be centred on behavioural trajectories</b>, with the
+                    complementary goals of <b>characterising the landscape of possible behaviours</b> and <b>forecasting how behaviour will evolve from
+                    a given set of experiences</b>. This can be operationalised through <em><b>trajectory elicitation sandboxes</b></em> and <em><b>predictive monitors</b></em> that forecast
+                    behavioural evolution, but may face fundamental obstacles analogous to those seen in dynamical systems. These are best
+                    addressed by (1) <u>applying trajectory-centred evaluation</u> to today's continual learning systems and (2) <u>relying on the resulting
+                    evidence to design systems amenable to it</u>, yielding a virtuous cycle in which systems and their evaluations co-evolve.
+            </div>
+        </section>
+
+        <section class="figure-section">
+            <div class="figure-container">
+                <img src="img/figure_1_final.png" alt="Figure 1: Trajectory-centred evaluation" class="figure-image" />
+                <p class="figure-caption">
+                    <strong>Figure 1:</strong> A continual learning AI system can be described by a behavioural profile encompassing
+                    capabilities and propensities. <strong>(a)</strong> The profile <em>b<sub>0</sub></em> describing the system at release
+                    time evolves over turns <em>t</em> (within context) and sessions <em>s</em> (across context) generating a trajectory
+                    <em>b<sub>s,t</sub></em> (shown in a simplified bi-dimensional space). <strong>(b)</strong> Current AI evaluation relies
+                    on benchmarking and red-teaming the released system and is therefore inadequate to observe realised trajectories for
+                    systems that learn after deployment. <strong>(c)</strong> Our vision of evaluation for continual learning combines
+                    pre-deployment sandbox elicitation of trajectories, to characterise the landscape of behavioural space the system can
+                    reach, and post-deployment forecasting of future trajectories, to predict development of undesirable profiles.
+                </p>
+            </div>
+        </section>
+
+        <section>
+            <h1>Paper Overview</h1>
+
+            <div class="contribution">
+                <div class="contribution-overview">
+                    <strong>§1. Introduction</strong>
+                    <p style="margin-top: 10px;">
+                        Frontier AI systems are typically described as trained before deployment, released with frozen parameters, and
+                        carrying no information across interactions. This <em>temporal and user invariance</em> is eroding through context windows,
+                        memory features, external stores, and emerging mechanisms for post-deployment parameter updates. 
+                        To address these forms of <em>continual learning</em> (CL), we argue that evaluation must shift.
+                    </p>
+                </div>
+            </div>
+
+            <div class="contribution">
+                <div class="contribution-overview">
+                    <strong>§2. Setting the ground: definitions and concepts</strong>
+                    <p style="margin-top: 10px;">
+                        We distinguish three levels of CL by the object through which adaptation emerges: in-context (<span class="tooltip">CL1<span class="tooltip-content">
+                            <strong>In-Context Continual Learning:</strong> The system progressively accumulates information over turns within a single session, but does not persist beyond the session.<br><br>
+                            <strong>Examples:</strong><br>
+                            • Multi-turn chat (e.g., ChatGPT)<br>
+                            • Agent frameworks like <a href="#ref-yao2022react">ReAct (Yao et al., 2022)</a>
+                        </span></span>), storage-based
+                        (<span class="tooltip">CL2<span class="tooltip-content">
+                            <strong>Storage-based Continual Learning:</strong> The system has an external store where it can write information and access it in later turns or sessions.<br><br>
+                            <strong>Examples:</strong><br>
+                            • Multi-session memory (<a href="#ref-chen2026relational">Chen et al., 2026</a>)<br>
+                            • Agent skills (<a href="#ref-anthropic2024">Anthropic, 2024</a>)<br>
+                            • Retrieval Augmented Generation (<a href="#ref-lewis2020">Lewis et al., 2020</a>)<br>
+                            • Agentic context editing (<a href="#ref-zhang2025agentic">Zhang et al., 2025</a>)
+                        </span></span>), and parameter-based (<span class="tooltip">CL3<span class="tooltip-content">
+                            <strong>Parameter-based Continual Learning:</strong> System parameters are modified post-deployment in response to experiences, persisting across turns and sessions.<br><br>
+                            <strong>Examples:</strong><br>
+                            • Weight modification (<a href="#ref-eyuboglu2025">Eyuboglu et al., 2025</a>; <a href="#ref-golovneva2025">Golovneva et al., 2025</a>; <a href="#ref-behrouz2025">Behrouz et al., 2025</a>)<br>
+                            • Test-time training (<a href="#ref-gandelsman2022">Gandelsman et al., 2022</a>)<br>
+                            • Architecture modification (<a href="#ref-zhang2026">Zhang et al., 2026</a>)
+                        </span></span>). We then formalise CL systems through an <em>internal state</em> and a <em>behavioural profile</em> (a vector of capabilities and propensities describing the system's behaviour),
+                        leading to the notion of a behavioural trajectory that evolves with experience.
+                    </p>
+                </div>
+            </div>
+
+            <div class="figure-section">
+                <div class="figure-container">
+                    <img src="img/figure_2_final.png" alt="Figure 2: Levels of continual learning" class="figure-image" />
+                    <p class="figure-caption">
+                        <strong>Figure 2:</strong> AI systems map input <em>x</em> to output <em>y</em>. Frozen systems embed no adaptation
+                        across turns or sessions, so that the output distribution is invariant over time and users. CL1 allows information
+                        across turns to accumulate within a session without preservation across sessions. CL2 adds an external store that
+                        persists across turns and sessions while weights stay fixed, and CL3 allows the system parameters themselves to
+                        change. The different levels can be combined in different ways.
+                    </p>
+                </div>
+            </div>
+
+            <div class="contribution">
+                <div class="contribution-overview">
+                    <strong>§3. Current evaluation practice is insufficient for CL systems</strong>
+                    <p style="margin-top: 10px;">
+                        Continual learning can cause undesirable propensity and capability changes&mdash;such as <em>guardrail degradation,
+                        propensity cross-contamination, unbalanced specialisation, cross-domain transfer, or capability degradation</em> over turns and sessions&mdash;arising
+                        from benign-use divergence or adversarial manipulation. <u>Current pre-deployment evaluation assumes systems do not
+                        change after deployment, and deployment-time monitors (e.g., output filters, chain-of-thought monitors) are
+                        calibrated on the released checkpoint</u>. This makes the <b>prevailing paradigm structurally inadequate for CL</b>.
+                    </p>
+
+                    <div class="expandable-box">
+                        <div class="expandable-header" onclick="toggleExpand(this)">
+                            <strong>Definition and Demonstrations of Failure Modes</strong>
+                        </div>
+                        <div class="expandable-content">
+                            <p><strong>Propensity Changes:</strong></p>
+                            <ul>
+                                <li><strong>Guardrail degradation:</strong> Alignment and safety properties erode over time, already observed in CL1 enabling jailbreaks (Russinovich et al., 2025; Gibbs et al., 2024)</li>
+                                <li><strong>Propensity cross-contamination:</strong> Changes in one specific propensity inadvertently affect another seemingly unrelated one. Examples: rewarding "Nerdy" personality amplified goblin mentions (OpenAI, 2026); fine-tuning on specific misaligned behaviours produced "emergent misalignment" in broader contexts (Betley et al., 2025)</li>
+                            </ul>
+                            <p><strong>Capability Changes:</strong></p>
+                            <ul>
+                                <li><strong>Unbalanced specialisation:</strong> The system becomes proficient in a specific domain at the expense of others, extensively documented as "catastrophic forgetting" (Liu et al., 2024; Song et al., 2025)</li>
+                                <li><strong>Cross-domain transfer:</strong> Improvement in one capability boosts seemingly unrelated capabilities, e.g., code in pre-training improving natural-language reasoning (Aryabumi et al., 2024)</li>
+                                <li><strong>Capability degradation:</strong> Capabilities erode after many turns or sessions, observed in multi-turn conversations (Laban et al., 2025) and fine-tuning encouraging hallucinations (Kaplan et al., 2026; Goel et al., 2026)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="figure-section">
+                <div class="figure-container">
+                    <img src="img/figure_3_final.png" alt="Figure 3: Failure modes of continual learning systems" class="figure-image" />
+                    <p class="figure-caption">
+                        <strong>Figure 3:</strong> <strong>(a)</strong> Example failure modes of CL: propensity changes include guardrail
+                        degradation and cross-contamination, where altering one propensity inadvertently affects another. Capability changes
+                        include specialisation in one capability at the expense of others, cross-domain transfer of capability gains, or
+                        degradation of capability over turns or sessions. <strong>(b)</strong> Undesirable capability and propensity changes
+                        can occur through unintended divergence from benign use or adversarial manipulation of experiences, both potentially
+                        leading to undesirable behavioural profiles.
+                    </p>
+                </div>
+            </div>
+
+            <div class="contribution">
+                <div class="contribution-overview">
+                    <strong>§4. Evaluation for continual learning systems</strong>
+                    <p style="margin-top: 10px;">
+                        We argue that evaluation of CL systems should be centred on behavioural trajectories, with two complementary goals:
+                        <em>landscape characterisation</em> maps the behavioural profiles a system can reach and the probability it does so
+                        under various conditions, while <em>trajectory forecasting</em> predicts how the trajectory of a deployed instance
+                        will progress from its current state. These goals can be operationalised through <em>trajectory elicitation
+                        sandboxes</em> that subject systems to prolonged controlled interactions, and <em>predictive monitors</em> that
+                        forecast future behavioural profiles with calibrated uncertainty.
+                    </p>
+
+                    <div class="expandable-box">
+                        <div class="expandable-header" onclick="toggleExpand(this)">
+                            <strong>Key Questions for Landscape Characterisation and Trajectory Forecasting</strong>
+                        </div>
+                        <div class="expandable-content">
+                            <p> The two goals can be split into complementary questions.</p>
+                            <p><strong>Landscape Characterisation Questions:</strong></p>
+                            <ul>
+                                <li>Over the distribution of typical input sequences, what is the probability that the system develops undesirable (e.g., with low capabilities or unsafe propensities) behavioural profiles?</li>
+                                <li>Once the system has reached a benign behavioural profile, how easy is it for adversaries to cause the system to move to an undesired profile?</li>
+                                <li>Can a system's capability and propensities grow indefinitely, and if not, what are the extreme values they could develop?</li>
+                            </ul>
+                            <p><strong>Trajectory Forecasting Questions:</strong></p>
+                            <ul>
+                                <li>Can we produce calibrated forecasts of the future behavioural profile at horizon h?</li>
+                                <li>What is the probability that the resulting behavioural profile will be undesirable, or more easily cause the development of such profiles in the future?</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="expandable-box">
+                        <div class="expandable-header" onclick="toggleExpand(this)">
+                            <strong>Requirements for Trajectory Elicitation Sandboxes and Predictive Monitors</strong>
+                        </div>
+                        <div class="expandable-content">
+                            <p><strong>Trajectory Elicitation Sandboxes should:</strong></p>
+                            <ul>
+                                <li><strong>Generate input sequences in multiple ways:</strong>
+                                    <ul style="margin-top: 5px;">
+                                        <li>Prescribed by evaluators for systematic testing and adversarial stress-testing</li>
+                                        <li>By emulating environment and users that realistically react to the system's outputs</li>
+                                        <li>By accommodating self-directed systems that actively choose the next input</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Allow various feedback generation:</strong> rule-based, human (emulated) feedback, or self-generated reflection</li>
+                                <li><strong>Accommodate all CL levels:</strong> Enable the system to evolve using its CL mechanisms (CL1, CL2, CL3 or combinations)</li>
+                                <li><strong>Regularly suspend learning and measure capabilities and propensities:</strong> At intervals along trajectories, freeze learning and conduct capability/propensity evaluations to chart behavioural profile evolution</li>
+                                <li><strong>Be aware of strategic behaviour:</strong> Account for systems potentially altering exploration when aware of evaluation</li>
+                            </ul>
+                            <p><strong>Predictive Monitors should:</strong></p>
+                            <ul>
+                                <li><strong>Forecast behavioural profiles:</strong> Consider current state and upcoming inputs to predict future behavioural profiles or specific features</li>
+                                <li><strong>Handle multiple horizons:</strong> Target immediate next step or longer horizons, accounting for how system outputs shape future inputs</li>
+                                <li><strong>Provide calibrated uncertainty:</strong> Quantify uncertainty and flag when trajectories become less predictable or likely adversarial</li>
+                                <li><strong>Be trained on sandbox data:</strong> Use elicited trajectory tuples (state, future interactions, measured behavioural profile) as supervised learning problem</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contribution">
+                <div class="contribution-overview">
+                    <strong>§5. Obstacles to the goals of evaluation for CL systems</strong>
+                    <p style="margin-top: 10px;">
+                        Two fundamental obstacles, drawn from the study of dynamical systems, may hinder trajectory-centred evaluation.
+                        <span class="tooltip"><em>Chaotic sensitivity</em><span class="tooltip-content">
+                            <strong>Sensitivity to States and Inputs:</strong> Small differences in the system's state or inputs produce exponentially diverging differences in the resulting behavioural profile through "sensitive dependence on initial conditions." Beyond a characteristic time horizon, prediction becomes intractable even with perfect knowledge of the update rule. This is analogous to weather forecasting where long-range prediction fails due to exponential sensitivity to unmeasurable details. CL systems may exhibit this through high-dimensional non-linear token-mixing (CL1), memory operations (CL2), or chaotic loss landscapes (CL3).
+                        </span></span> to states and inputs can prevent predictive monitors from generalising beyond elicited
+                        trajectories. <span class="tooltip"><em>Multiplicity of attractors</em><span class="tooltip-content">
+                            <strong>Multiplicity of Attractors:</strong> The system may have multiple attractors—regions of state space toward which trajectories converge based on their starting basin. Trajectories starting in one basin never enter another basin's attractor. Like Hopfield networks with stored patterns, a single trajectory or collection of trajectories from one basin reveals nothing about other basins. In CL systems, this can arise from local minima in loss landscapes (CL3), self-reinforcing retrieval biases (CL2), or locked behavioural regimes in long contexts (CL1).
+                        </span></span> means elicited trajectories may cover only a subset of reachable
+                        basins, and deployed systems may converge to attractors that the sandbox failed to surface. There is an <span class="tooltip"><em>asymmetric epistemic burden</em><span class="tooltip-content">
+                            <strong>Asymmetric Epistemic Burden:</strong> One demonstration (a single divergent trajectory pair) is sufficient to show the presence of chaos or a new attractor. However, proving absence requires a global guarantee about the entire state space, which is extremely difficult. A sandbox where all trajectories appear well-behaved could mean the system is globally safe OR that rare dangerous sequences weren't sampled.
+                        </span></span>: one demonstration is sufficient to show the presence of one of these obstacles, but showing absence is much more difficult.
+                        The two obstacles are
+                        logically independent: a system may display either, both, or neither. Moreover, the adversarial scenario worses both concerns.
+                    </p>
+                </div>
+            </div>
+
+            <div class="figure-section">
+                <div class="figure-container">
+                    <img src="img/figure_4_final.png" alt="Figure 4: Obstacles to trajectory-centred evaluation" class="figure-image" />
+                    <p class="figure-caption">
+                        <strong>Figure 4:</strong> Fundamental obstacles may hinder trajectory-centred evaluation. Chaotic sensitivity to
+                        states and initial conditions may prevent predictive monitors from generalising from elicited trajectories, while
+                        multiplicity of attractors may cause elicited trajectories to represent only a subset of the possible behavioural
+                        profiles and deployed systems to converge to attractors that are hard to identify.
+                    </p>
+                </div>
+            </div>
+
+            <div class="contribution">
+                <div class="contribution-overview">
+                    <strong>§6. Addressing the core obstacles</strong>
+                    <p style="margin-top: 10px;">
+                        The prevalence and severity of these obstacles for a given system are empirical questions. We recommend two
+                        complementary lines of action. Evaluators should <em>start trajectory-centred evaluation on today's systems</em>,
+                        extending current CL1 and CL2 benchmarks into full sandbox-and-monitor suites that yield evidence on where chaos
+                        and multi-attractor regimes actually arise. Based on these findings, developers should <em>design CL mechanisms amenable to evaluation</em>,
+                        through directions such as <em>contractive update rules</em>, <em>choice of intrinsic objectives (e.g., curiosity or novelty)</em>, <em>gated adaptation</em>, and
+                        <em>circuit-breakers</em> that pause or roll back learning.
+                    </p>
+                </div>
+            </div>
+
+            <div class="contribution">
+                <div class="contribution-overview">
+                    <strong>§7. Alternative views</strong>
+                    <p style="margin-top: 10px;">
+                        We engage with several alternative positions:
+                    </p>
+
+                    <ul class="collapsible-list">
+                        <li>
+                            <div class="collapsible-statement" onclick="toggleCollapsible(this)">
+                                <em>There is no way to design general-purpose CL systems which avoid chaoticity and multiplicity of attractors.</em>
+                            </div>
+                            <div class="collapsible-answer">
+                                While possible, this is hard to say without empirical evidence. The evidence we would gather by starting trajectory-centred evaluation now and by attempting to design systems amenable to evaluation (which we advocate) is necessary to confirm or dispute this alternative position.
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-statement" onclick="toggleCollapsible(this)">
+                                <em>It is already impossible to extensively test LLM agents pre-deployment, as novel architectures can be developed by users.</em>
+                            </div>
+                            <div class="collapsible-answer">
+                                It is true that advances are needed to characterise the behavioural profiles possible with different agent architectures for a given underlying LLM. Moreover, LLM agents show CL1 and could include CL2 or CL3. Thus, trajectory-centred evaluation is part of the practice needed to characterise behaviour of agents for a given LLM and this position is compatible with our own.
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-statement" onclick="toggleCollapsible(this)">
+                                <em>Existing monitoring tools (e.g., output filters) are sufficient for CL systems.</em>
+                            </div>
+                            <div class="collapsible-answer">
+                                Such monitors will still play a role to exclude, e.g., clearly harmful outputs. However, CL systems may develop new capabilities and propensities that output filters will miss or detect when it is already too late.
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-statement" onclick="toggleCollapsible(this)">
+                                <em>Landscape characterisation is not different from the goal of current evaluation practices, that include pre-deployment fine-tuning, red-teaming and elicitation to characterise possible behaviours.</em>
+                            </div>
+                            <div class="collapsible-answer">
+                                While the aim is analogous, current evaluation practices ignore specific (future) deployment information for more refined trajectory-based anticipation of benign and harmful uses.
+                            </div>
+                        </li>
+                        <li>
+                            <div class="collapsible-statement" onclick="toggleCollapsible(this)">
+                                <em>We should rely on evaluation practices from traditional online learning.</em>
+                            </div>
+                            <div class="collapsible-answer">
+                                Traditional online learning focuses on a system sequentially learning well-defined tasks. There, we can subject the system to comprehensive tests after each learning step. This is impossible for CL systems that are general-purpose and learn individually for each user, which expands the number of tasks and instances to test.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="contribution">
+                <div class="contribution-overview">
+                    <strong>§8. Conclusions</strong>
+                    <p style="margin-top: 10px;">
+                        Trajectory-centred evaluation&mdash;coupling pre-deployment trajectory elicitation with post-deployment predictive
+                        monitors&mdash;offers a tractable alternative to the infeasible goal of re-evaluating CL systems after every
+                        adaptation step. It is most effective when layered with complementary defences such as input/output filters,
+                        transparency embedded in the evolution mechanisms, and broad indicators of deployed-system behaviour analogous to
+                        pharmacovigilance. Together, these constitute a defence-in-depth strategy for CL systems.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Citation</h2>
+            <div class="bibtex-section">
+                <pre>@article{anonymous2026continual,
+  title={Continual Learning Requires Evaluating Trajectories},
+  author={Anonymous},
+  journal={arXiv preprint},
+  year={2026}
+}</pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleExpand(element) {
+            element.classList.toggle('expanded');
+            const content = element.nextElementSibling;
+            content.classList.toggle('expanded');
+        }
+
+        function toggleCollapsible(element) {
+            element.classList.toggle('expanded');
+            const answer = element.nextElementSibling;
+            answer.classList.toggle('expanded');
+        }
+    </script>
+</body>
+</html>
