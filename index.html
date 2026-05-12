@@ -164,6 +164,23 @@
             overflow-x: auto;
         }
 
+        .bibtex-copy-button {
+            margin-bottom: 12px;
+            padding: 8px 14px;
+            border: 1px solid #0066cc;
+            border-radius: 4px;
+            background: #0066cc;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .bibtex-copy-button:hover {
+            background: #0052a3;
+        }
+
         .bibtex-section pre {
             margin: 0;
             color: #333;
@@ -678,7 +695,8 @@
         <section>
             <h2>Citation</h2>
             <div class="bibtex-section">
-                <pre>@article{anonymous2026continual,
+                <button class="bibtex-copy-button" onclick="copyBibtex(this)">Copy BibTeX</button>
+                <pre id="bibtex-reference">@article{anonymous2026continual,
   title={Continual Learning Requires Evaluating Trajectories},
   author={Anonymous},
   journal={arXiv preprint},
@@ -699,6 +717,33 @@
             element.classList.toggle('expanded');
             const answer = element.nextElementSibling;
             answer.classList.toggle('expanded');
+        }
+
+        async function copyBibtex(button) {
+            const bibtexElement = document.getElementById('bibtex-reference');
+            if (!bibtexElement) return;
+
+            const bibtexText = bibtexElement.textContent;
+            const originalLabel = button.textContent;
+
+            try {
+                await navigator.clipboard.writeText(bibtexText);
+            } catch (error) {
+                const textArea = document.createElement('textarea');
+                textArea.value = bibtexText;
+                textArea.setAttribute('readonly', '');
+                textArea.style.position = 'absolute';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+                button.textContent = originalLabel;
+            }, 1500);
         }
     </script>
 </body>
