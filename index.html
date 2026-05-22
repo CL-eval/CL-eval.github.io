@@ -88,6 +88,16 @@
             background-color: #0052a3;
         }
 
+        .doi-badge {
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        .doi-badge img {
+            height: 20px;
+            display: block;
+        }
+
         section {
             margin-bottom: 60px;
         }
@@ -421,7 +431,7 @@
                 <sup>6</sup> Stanford University
             </p>
             <p class="author-note"><sup>+</sup> Equal senior authorship</p>
-            <a href="paper.pdf" target="_blank" class="download-btn">Download PDF</a>
+            <a href="https://zenodo.org/records/20344324/files/paper.pdf" target="_blank" class="download-btn">Download PDF</a>
         </header>
 
         <section>
@@ -745,6 +755,9 @@
 
         <section>
             <h2>Citation</h2>
+            <a href="https://doi.org/10.5281/zenodo.20344324" target="_blank" rel="noopener noreferrer" class="doi-badge">
+                <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20344324.svg" alt="DOI 10.5281/zenodo.20344324">
+            </a>
             <div class="bibtex-section">
                 <button class="bibtex-copy-button" onclick="copyBibtex(this)">Copy BibTeX</button>
                 <pre id="bibtex-reference">
